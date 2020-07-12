@@ -1,0 +1,17 @@
+﻿1) πname,surname,telephone_number (Employee⨝ ssn=employee_id Employee_Numbers)
+2) σtelephone_number≥'070000000' ∧ telephone_number≤ '072999999' (Employee ⨝ ssn=employee_id Employee_Numbers)
+3) NoA1 = σ telephone_number≤'075000000' ∨ telephone_number ≥ '078999999' (Employee_Numbers) 
+SellerNo = NoA1 ⨝ Seller
+Employee ⨝ SellerNo
+4)πssn (Agent_Seller) ∩ πssn (Agent_Manager)
+5)(πssn(Employee)) ∩ Agent
+6)Agenti = π Employee.ssn, Employee.name, Employee.surname (Agent_Seller ⨝ 				Agent_Seller.ssn = Employee.ssn Employee)
+	Rezultati = Agenti ⨝ Employee.ssn=Customer.assigned_agent_ssn Customer
+	π Customer.ssn, Customer.name, Customer.surname, Employee.ssn, Employee.name, 				Employee.surname (Rezultati)
+7)π comment (σ grade>2 ∧ comment≠null Product_Review)
+8)π comment (σ grade>2 ∧ comment≠null Store_Review)
+9)Con30 = πagent_seller_ssn, duration (σduration > 30 (Scheduled_Talks ⨝ agent_seller_ssn = ssn Agent_Seller))
+γ agent_seller_ssn; count(duration)->sumTalks (Con30) 
+10) Proizvodi = π code, price (Product)
+    Naracki = Purchase ⨝ product_id=code Proizvodi
+    π seller_ssn, product_id, customer_ssn, (quantity * price) -> totalPrice Naracki

@@ -1,0 +1,85 @@
+1)
+select id, duration
+from talk
+where duration > (select avg(duration)
+                  from talk)
+2)
+
+create view prodavnici (id, prosek) as
+select id, avg(grade)
+from review_store
+group by id
+
+create view REJTING (customerSsn, prosek) as
+select ssn, avg(grade)
+from review_store
+where commentP not like '-'
+group by ssn
+
+create view ZALIHA(id, code, count, prosek) as
+select id, code, count, prosek
+from prodavnici p join stock s1 on p.id=s1.id
+where prosek >= ALL(select prosek 
+                    from REJTING )
+
+select c.ssn, count(distinct code)
+from customer c join purchase p on c.ssn = p.ssn_customer join REJTING r on c.ssn=r.customerSsn
+where p.code = any(select code
+                   from ZALIHA)
+group by c.ssn
+
+
+3)
+WITH CTE_PURCHASE(code, quantity)
+AS (SELECT code, sum(quantity)
+    FROM purchase
+    GROUP BY code )
+
+SELECT *
+FROM CTE_PURCHASE join PRODUCT on cte_purchase.code = product.code
+WHERE QUANTITY = (SELECT max(quantity)
+                  FROM CTE_PURCHASE 
+                  )
+
+4)
+create view ocenka(id, ssn, grade) as
+select id, ssn, grade
+from review_store
+where grade>1 and grade not like '-'
+
+create view kolicina(ssn_customer,code,quantity) as
+select ssn_customer, code, quantity
+from purchase
+where quantity>1
+
+select *
+from ocenka o join store s on o.id = s.id
+where ssn in (select ssn_customer
+              from customer c join kolicina k on c.ssn = k.ssn_customer )
+
+5) 
+create view sumPoAgent (ssn_seller, sumDuration) as
+select ssn_seller, sum(duration)
+from talk
+group by ssn_seller
+
+select *
+from employee e join sumPoAgent a on e.ssn=a.ssn_seller
+where sumDuration = (select max(sumDuration)
+                     from sumPoAgent )
+
+6)
+with cte_cena(id, cena)
+as (
+	select s1.id, sum(s.count*p.price)
+	from stock s join on product p on s.code=p.code join store s1 on s.id = s1.id
+	group by s1.id
+)
+
+select id, s.name, s.adress, code, count, cena
+from cte_sena c join store s on c.id=s.id join stock s1 on c.id = s1.id
+where cena >= all (select cena
+		from cte_cena)
+
+
+
